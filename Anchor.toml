@@ -11,7 +11,7 @@ dao_voting = "BwydVvtLyvVjB1TyyjF8zqJ6zXHFLF4jWcqHoxuMifAT"
 url = "https://api.devnet.solana.com"
 
 [provider]
-cluster = "https://api.devnet.solana.com"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

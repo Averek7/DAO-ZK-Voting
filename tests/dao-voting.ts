@@ -1,42 +1,34 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { DaoVotingProgram } from "../target/types/dao_voting_program";
+import { DaoVoting } from "../target/types/dao_voting";
 import { assert } from "chai";
 
-describe("dao_voting_program", () => {
+describe("dao_voting", () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
-  const program = anchor.workspace.DaoVotingProgram as Program<DaoVotingProgram>;
-  const proposalTitle = "Test Proposal";
-  const proposalDescription = "This is a test proposal.";
-  let proposalAccount = anchor.web3.Keypair.generate();
-  let creatorAccount = anchor.web3.Keypair.generate();
+  const program = anchor.workspace.DaoVoting as Program<DaoVoting>;
 
   it("Create a proposal", async () => {
-    // Airdrop SOL to creator account for transaction fees
-    const provider = anchor.AnchorProvider.env();
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(creatorAccount.publicKey, 1_000_000_000) // 1 SOL
+    const proposalTitle = "Test Proposal #1";
+    const proposalDescription = "This is a test proposal #1.";
+    let [proposalAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from(proposalTitle)],
+      program.programId
     );
 
-    await program.rpc.createProposal(
-      proposalTitle,
-      proposalDescription,
-      {
-        accounts: {
-          proposal: proposalAccount.publicKey,
-          user: creatorAccount.publicKey,
-          systemProgram: anchor.web3.SystemProgram.programId,
-        },
-        signers: [proposalAccount, creatorAccount],
-        instructions: [
-          await program.account.proposal.createInstruction(proposalAccount),
-        ],
-      }
-    );
+    await program.methods
+      .createProposal(proposalTitle, proposalDescription)
+      .accounts({
+        proposal: proposalAccount,
+        user: provider.wallet.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([])
+      .rpc();
 
-    const proposal = await program.account.proposal.fetch(proposalAccount.publicKey);
+    const proposal = await program.account.proposal.fetch(proposalAccount);
     assert.equal(proposal.title, proposalTitle);
     assert.equal(proposal.description, proposalDescription);
   });

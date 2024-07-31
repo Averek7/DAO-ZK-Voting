@@ -9,7 +9,7 @@ pub mod state;
 declare_id!("BwydVvtLyvVjB1TyyjF8zqJ6zXHFLF4jWcqHoxuMifAT");
 
 #[program]
-pub mod dao_voting_program {
+pub mod dao_voting {
     use super::*;
 
     pub fn create_proposal(

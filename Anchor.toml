@@ -7,6 +7,9 @@ skip-lint = false
 [programs.localnet]
 dao_voting = "BwydVvtLyvVjB1TyyjF8zqJ6zXHFLF4jWcqHoxuMifAT"
 
+[programs.devnet]
+dao_voting = "BwydVvtLyvVjB1TyyjF8zqJ6zXHFLF4jWcqHoxuMifAT"
+
 [registry]
 url = "https://api.devnet.solana.com"
 

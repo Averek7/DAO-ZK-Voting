@@ -5,6 +5,7 @@ use instructions::vote::*;
 
 pub mod instructions;
 pub mod state;
+pub mod error;
 
 declare_id!("8twZTybaCyudgUKJPEkdgD9SkFfoABrUsx86gwKgnv8h");
 
@@ -20,8 +21,8 @@ pub mod dao_voting {
         create_proposal_handler(ctx, title, description)
     }
 
-    pub fn vote(ctx: Context<Vote>, title: String, vote: bool) -> Result<()> {
-        vote_handler(ctx, title, vote)
+    pub fn vote(ctx: Context<Vote>, title: String, vote: bool, zk_proof: Vec<u8>, public_input: String ) -> Result<()> {
+        vote_handler(ctx, title, vote, zk_proof, public_input)
     }
 
     pub fn reward_participation(

@@ -6,8 +6,8 @@ pub fn reward_participation_handler(
     voter_pubkey: Pubkey,
 ) -> Result<()> {
     let voter: &mut Account<Voter> = &mut ctx.accounts.voter;
-    voter.reward_points += 1;
-    voter.pubkey = voter_pubkey;
+    voter.reward_points += 1; 
+    voter.pubkey = voter_pubkey; 
     Ok(())
 }
 

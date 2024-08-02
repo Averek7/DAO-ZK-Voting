@@ -15,7 +15,7 @@ dao_voting = "8twZTybaCyudgUKJPEkdgD9SkFfoABrUsx86gwKgnv8h"
 url = "https://api.devnet.solana.com"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/my-keypair.json"
 
 [test]

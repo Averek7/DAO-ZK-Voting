@@ -32,29 +32,27 @@ pub fn vote_handler(
 }
 
 fn verify_zk_proof(zk_proof: Vec<u8>, public_input: String, verifying_key: &[u8]) -> Result<()> {
-     // Decode the zk-proof from bytes
-     let proof = Proof::<Bls12>::read(&zk_proof[..]).map_err(|_| CustomError::InvalidProof)?;
+    // Deserialize and verify zk-SNARK proof
+    let proof = Proof::<Bls12>::read(&zk_proof[..]).map_err(|_| CustomError::InvalidProof)?;
 
-     // Decode the public input and convert it to a Scalar
-     let vk_bytes = hex::decode(&public_input).map_err(|_| CustomError::InvalidPublicInput)?;
-     if vk_bytes.len() != 32 {
-         return Err(CustomError::InvalidPublicInput.into());
-     }
-     let mut array = [0u8; 64];
-     array.copy_from_slice(&vk_bytes);
-     let scalar = Scalar::from_bytes_wide(&array);
- 
-     // Decode and prepare the verifying key
-     let vk = GrothVerifyingKey::<Bls12>::read(verifying_key).map_err(|_| CustomError::InvalidVerifyingKey)?;
-     let pvk = prepare_verifying_key(&vk);
- 
-     // Verify the proof
-     let result = verify_proof(&pvk, &proof, &[scalar]);
-     if result.is_err() {
-         return Err(CustomError::ProofVerificationFailed.into());
-     }
- 
-     Ok(())
+    // Convert public input from string to Scalar
+    let bytes = hex::decode(&public_input).map_err(|_| CustomError::InvalidPublicInput)?;
+    require!(bytes.len() == 32, CustomError::InvalidPublicInput); // Ensure bytes length is correct
+
+    let mut array = [0u8; 64]; // Use a 64-byte array
+    array[..32].copy_from_slice(&bytes);
+    let scalar = Scalar::from_bytes_wide(&array);
+
+    // Deserialize verifying key
+    let vk = GrothVerifyingKey::<Bls12>::read(verifying_key).map_err(|_| CustomError::ProofVerificationFailed)?;
+    let pvk = prepare_verifying_key(&vk);
+
+    // Verify the proof
+    let result = verify_proof(&pvk, &proof, &[scalar]);
+    if result.is_err() {
+        return Err(CustomError::ProofVerificationFailed.into());
+    }
+    Ok(())
 }
 
 #[derive(Accounts)]
@@ -68,7 +66,7 @@ pub struct Vote<'info> {
         realloc::payer = user,
         realloc::zero = true
     )]
-    pub proposal: Account<'info, Proposal>,
+    pub proposal: Box<Account<'info, Proposal>>,
     #[account(
         init,
         seeds = [title.as_bytes(), user.key().as_ref()],
@@ -76,22 +74,16 @@ pub struct Vote<'info> {
         payer = user,
         space = 8 + UserVote::INIT_SPACE
     )]
-    pub user_vote: Account<'info, UserVote>,
+    pub user_vote: Box<Account<'info, UserVote>>,
     #[account(
         init,
-        seeds = [user.key.as_ref()],
+        seeds = [b"verifyKey".as_ref(), user.key().as_ref()],
         bump,
         payer = user,
-        space = 8 + 32 + 8
+        space = VerifyingKey::INIT_SPACE,
     )]
-    pub verifying_key: Account<'info, VerifyingKey>,
+    pub verifying_key: Box<Account<'info, VerifyingKey>>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
-}
-
-
-#[account]
-pub struct VerifyingKey {
-    pub key: Vec<u8>,
 }

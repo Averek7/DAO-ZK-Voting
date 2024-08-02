@@ -5,7 +5,7 @@ pub fn reward_participation_handler(
     ctx: Context<RewardParticipation>,
     voter_pubkey: Pubkey,
 ) -> Result<()> {
-    let voter: &mut Account<Voter> = &mut ctx.accounts.voter;
+    let voter: &mut Box<Account<Voter>> = &mut ctx.accounts.voter;
     voter.reward_points += 1; 
     voter.pubkey = voter_pubkey; 
     Ok(())
@@ -21,7 +21,7 @@ pub struct RewardParticipation<'info> {
         payer = user,
         space = 8 + Voter::INIT_SPACE,
     )]
-    pub voter: Account<'info, Voter>,
+    pub voter: Box<Account<'info, Voter>>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,

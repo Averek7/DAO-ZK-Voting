@@ -33,3 +33,9 @@ pub struct Voter {
     pub pubkey: Pubkey,
     pub reward_points: u64,
 }
+
+#[account]
+#[derive(InitSpace)]
+pub struct VerifyingKey {
+    pub key: [u8; 64],
+}

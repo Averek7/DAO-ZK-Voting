@@ -19,4 +19,7 @@ idl-build = ["anchor-lang/idl-build"]
 [dependencies]
 anchor-lang = "0.29.0"
 anchor-spl = "0.29.0"
+bellman = "0.14.0"
+bls12_381 = "0.8.0"
+hex = "0.4.3"
 

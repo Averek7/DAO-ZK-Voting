@@ -6,7 +6,7 @@ pub fn create_proposal_handler(
     title: String,
     description: String,
 ) -> Result<()> {
-    let proposal = &mut ctx.accounts.proposal;
+    let proposal: &mut Box<Account<Proposal>> = &mut ctx.accounts.proposal;
     proposal.title = title;
     proposal.description = description;
     proposal.yes_votes = 0;
@@ -25,7 +25,15 @@ pub struct CreateProposal<'info> {
         payer = user,
         space = 8 + Proposal::INIT_SPACE
     )]
-    pub proposal: Account<'info, Proposal>,
+    pub proposal: Box<Account<'info, Proposal>>,
+    #[account(
+        init,
+        seeds = [b"verifyKey".as_ref(), user.key().as_ref()],
+        bump,
+        payer = user,
+        space = VerifyingKey::INIT_SPACE,
+    )]
+    pub verifying_key: Box<Account<'info, VerifyingKey>>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
